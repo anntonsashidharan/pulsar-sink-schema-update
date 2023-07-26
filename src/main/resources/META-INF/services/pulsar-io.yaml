@@ -1,0 +1,7 @@
+
+name: MyConnector
+description: MyConnector
+sinkClass: com.anton.sync.MySink
+
+
+
