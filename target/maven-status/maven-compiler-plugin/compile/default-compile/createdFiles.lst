@@ -1,2 +1,4 @@
 com/anton/sync/MySink.class
+com/anton/sync/SchemaConstructor2.class
+com/anton/sync/SchemaConstructor2$Field.class
 com/anton/sync/SchemaConstructor.class

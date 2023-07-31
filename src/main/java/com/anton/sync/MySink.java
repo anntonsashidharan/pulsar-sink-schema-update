@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.saasquatch.jsonschemainferrer.JsonSchemaInferrer;
 import com.saasquatch.jsonschemainferrer.SpecVersion;
 import org.apache.pulsar.client.api.Schema;
@@ -15,7 +17,11 @@ import org.apache.pulsar.io.core.SinkContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MySink implements Sink<GenericObject> {
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -39,10 +45,10 @@ public class MySink implements Sink<GenericObject> {
                 if (isValidJson(data)) {
                     try {
                         JsonNode sample = mapper.readTree(data);
-                        ObjectNode inferredSchema = inferrer.inferForSample(sample);
-                        System.out.println("Schema derived from data...");
-                        System.out.printf("%s : %s%n", "TOPIC NAME ", record.getTopicName());
-                        System.out.printf("%s : %s%n", "SCHEMA INFO ", mapper.writerWithDefaultPrettyPrinter().writeValueAsString(inferredSchema));
+//                        ObjectNode inferredSchema = inferrer.inferForSample(sample);
+//                        System.out.println("Schema derived from data...");
+//                        System.out.printf("%s : %s%n", "TOPIC NAME ", record.getTopicName());
+//                        System.out.printf("%s : %s%n", "SCHEMA INFO ", mapper.writerWithDefaultPrettyPrinter().writeValueAsString(inferredSchema));
                         // TODO : Expose a REST service from the application responsible for handling the schema upload by user and call the API
 
 
@@ -53,6 +59,20 @@ public class MySink implements Sink<GenericObject> {
 //                        System.out.println("Schema derived from data...");
 //                        System.out.printf("%s : %s%n", "SCHEMA INFO ", dynamicSchema);
 //                        System.out.println("----------------------------");
+
+                        JSONObject jsonObject = new JSONObject(data);
+                        Set<SchemaConstructor2.Field> fields = SchemaConstructor2.convertToDotKeys(jsonObject);
+                        System.out.println("----------------------------");
+                        System.out.println("Schema derived from data...");
+                        GsonBuilder builder = new GsonBuilder();
+                        builder.setPrettyPrinting();
+                        Gson gson = builder.create();
+                        List<SchemaConstructor2.Field> fieldsList = new ArrayList<>(fields);
+                        Collections.sort(fieldsList);
+                        System.out.printf("%s : %s%n", "SCHEMA INFO ", gson.toJson(fieldsList));
+                        System.out.println("----------------------------");
+
+
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
                         // handle exception if needed
